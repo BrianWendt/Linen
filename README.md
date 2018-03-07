@@ -8,4 +8,4 @@ The Linen library started out as a way to expedite printed and digital prototypi
 Linen could use some help if it is to become usable in projects. Completed documentation including examples would be a good start. 
 
 ## Documentation
-Currently there is only JSDoc inline with the source code. You can find a sample [here](https://jsfiddle.net/OntoDevelopment/656o6y8s/) on JSFiddle.
+You can find [documentation here](https://github.com/BrianWendt/Linen/Documentation) or inline JSDoc.
