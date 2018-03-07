@@ -1,2 +1,8 @@
 # Linen
-API for variable data playing card design.
+Javascript library for HTML5 Canvas designed to simplify 2d drawing for common tasks.
+
+## Background
+The Linen library started out as a way to expedite printed and digital prototyping of card games. The name “Linen” comes from a printed asset finish called “linen” that is commonly used on playing cards.
+
+## Development
+Linen could use some help if it is to become usable in projects. Completed documentation including examples would be a good start. Currently there is only JSDoc inline with the source code.
