@@ -1,0 +1,19 @@
+{
+  "name": "Linen",
+  "description": "Linen.js is a Javascript library for the HTML5 Canvas API designed to simplify 2d drawing for common tasks.",
+  "version": "0.2.0",
+  "private": false,
+  "homepage": "https://github.com/BrianWendt/Linen/",
+  "dependencies": {
+    "@node-minify/core": "^4.0.5",
+    "@node-minify/uglify-es": "^4.0.5",
+    "docdash": "^1.1.0",
+    "jsdoc": "^3.5.5",
+    "merge-files": "^0.1.1"
+  },
+  "scripts": {
+    "build": "node ./scripts/build.js",
+    "build_doc": "npm run build && npm run doc",
+    "doc": "./node_modules/.bin/jsdoc -R ./README.md -c ./scripts/jsdoc_config.json"
+  }
+}
