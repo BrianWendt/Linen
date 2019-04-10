@@ -56,8 +56,8 @@ var Linen = class {
      * Render the elements onto the canvas.
      */
     render() {
-        this.elements.sort(function(a, b) {
-            return (a.settings.zindex > b.settings.zindex);
+        this.elements = this.elements.sort(function(a, b) {
+            return (a.settings.zindex > b.settings.zindex) ? 1 : -1;
         });
         this.elements.map(element => {
             element.render();
