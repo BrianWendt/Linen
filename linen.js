@@ -7,9 +7,7 @@ var Linen = class {
     /**
      * @param {object} canvas - HTML DOM reference to canvas element
      */
-    constructor(canvas) {
-        this.canvas = null;
-        
+    constructor(canvas = false) {
         this.elements = [];
 
         /*
@@ -19,14 +17,23 @@ var Linen = class {
          300 - Standard Printing DPI
          */
         this.dpi = 144;
-
-        this.canvas = canvas;
+        const type = typeof canvas;
+        switch (type) {
+            case "object":
+                this.canvas = canvas;
+                break;
+            case "string":
+                this.canvas = document.querySelector(canvas);
+                break;
+            default:
+                this.canvas = document.createElement('canvas');
+        }
         this.ctx = this.canvas.getContext("2d");
         this.ctx.imageSmoothingQuality = "high";
-        
+
         this.elements = [];
     }
-
+    
     /**
      * Factory to create Linen element and add it to the canvas.
      * @param {string} type
@@ -43,6 +50,36 @@ var Linen = class {
             return element;
         }
     }
+    
+    /**
+     * Set the width of the HTML5 canvas node
+     * @param {string} width
+     * @returns {Linen}
+     */
+    setWidth(width){
+        this.canvas.width = width;
+        return this;
+    }
+    
+    /**
+     * Set the height of the HTML5 canvas node
+     * @param {string} height
+     * @returns {Linen}
+     */
+    setHeight(height){
+        this.canvas.height = height;
+        return this;
+    }
+    
+    /**
+     * Get the dataURL of the canvas.
+     * Note: this may not work if you've "tainted" the canvas with an image.
+     * @param {string} format - image/png | image/jpg
+     * @returns {string}
+     */
+    getUrl(format = 'image/png'){
+        return this.canvas.toDataURL(format);
+    }
 
     /**
      * Get the canvas' context
@@ -51,21 +88,36 @@ var Linen = class {
     context() {
         return this.ctx;
     }
-    
+
     /**
-     * Render the elements onto the canvas.
+     * Sort the elements by zindex and start the rendering queue.
      */
     render() {
-        this.elements.sort(function(a, b) {
-            return (a.settings.zindex > b.settings.zindex);
+        this.elements = this.elements.sort(function (a, b) {
+            if (a.settings.zindex > b.settings.zindex) {
+                return 1;
+            } else if (a.settings.zindex < b.settings.zindex) {
+                return -1;
+            } else {
+                return 0;
+            }
         });
-        this.elements.map(element => {
-            element.render();
-        });
+        this.renderQueued();
+    }
+
+    /**
+     * Render the next element onto the canvas.
+     * @access private
+     */
+    renderQueued() {
+        if (this.elements.length > 0) {
+            const element = this.elements.shift();
+            element.render().afterRender();
+        }
     }
 }
 /**
- * All 
+ * All other Linen elements extend this Model.
  */
 Linen.Model = class {
 
@@ -109,7 +161,9 @@ Linen.Model = class {
 
         this.fill = false;
         this.stroke = false;
-
+        this.clip = false;
+        this.trasform = false;
+        this.callback = function(){}
     }
 
     /**
@@ -143,7 +197,7 @@ Linen.Model = class {
     x() {
         var x = this.getDimensionPx("x"); //px
         var w = this.width(); //px
-        switch (this.getDimension("alignment")) {
+        switch (this.settings.alignment) {
             case "center":
                 return x - (w / 2);
             case "right":
@@ -216,15 +270,15 @@ Linen.Model = class {
 
     /**
      * Set the x reference point for positioning
-     * @param {string} val - left(default)|center|right
+     * @param {'left' | 'center' | 'right'} [alignment=left] - left|center|right
      * @return {self} self
      */
-    setAlignment(val) {
-        return this.setSetting("alignment", val.toLowerCase());
+    setAlignment(alignment = 'left') {
+        return this.setSetting("alignment", alignment.toLowerCase());
     }
 
     /**
-     * Set the reference point for positioning to center
+     * Shorthand to set the reference point for positioning to center
      * @return {self} self
      */
     center() {
@@ -233,15 +287,15 @@ Linen.Model = class {
 
     /**
      * Set the y reference point for positioning
-     * @param {string} val - top(default)|middle|bottom
+     * @param {'top' | 'middle' | 'bottom'} [v_alignment=top] - top|middle|bottom
      * @return {self} self
      */
-    setVAlignment(val) {
-        return this.setSetting("v_alignment", val.toLowerCase());
+    setVAlignment(v_alignment = "top") {
+        return this.setSetting("v_alignment", v_alignment.toLowerCase());
     }
 
     /**
-     * Set the y reference point for positioning to bottom
+     * Shorthand to set the y reference point for positioning to bottom
      * @return {self} self
      */
     middle() {
@@ -249,11 +303,26 @@ Linen.Model = class {
     }
 
     /**
+     * Set the transform to be used on 
+     * @see {@link https://www.w3schools.com/tags/canvas_transform.asp|w3schools}
+     * @param {type} a - Horizontal scaling. A value of 1 results in no scaling.
+     * @param {type} b - Vertical skewing.
+     * @param {type} c - Horizontal skewing.
+     * @param {type} d - Vertical scaling. A value of 1 results in no scaling.
+     * @param {type} e - Horizontal translation (moving).
+     * @param {type} f - Vertical translation (moving).
+     * @returns {self} self
+     */
+    setTransorm(a = 1, b = 0, c = 0, d = 1, e = 0, f = 0) {
+        return this.setProp("transform", {"a": a, "b": b, "c": c, "d": d, "e": e, "f": f});
+    }
+
+    /**
      * Enable or disable rendering the fill
      * @param {bool} bool - TRUE|FALSE
      * @return {self} self
      */
-    setFill(bool) {
+    setFill(bool = true) {
         return this.setProp("fill", bool);
     }
 
@@ -262,40 +331,17 @@ Linen.Model = class {
      * @param {bool} bool - TRUE|FALSE
      * @return {self} self
      */
-    setStroke(bool) {
+    setStroke(bool = true) {
         return this.setProp("stroke", bool);
     }
 
     /**
-     * Get the value in px of a 2d attribute.
-     * @param {string} dimension - dimension name.
-     * @return {mixed} value
+     * Enable or disable using the path as a clipping mask.
+     * @param {bool} bool - TRUE|FALSE
+     * @return {self} self
      */
-    getDimension(dimension) {
-        return this.dimensions[dimension] || null;
-    }
-
-    /**
-     * Get the value in px of a 2d attribute.
-     * @param {string} dimension - dimension name.
-     * @return {number} px
-     */
-    getDimensionPx(dimension) {
-        const value = this.getDimension(dimension);
-        if (value === null) {
-            return 0;
-        }
-        const type = typeof value;
-        switch (type) {
-            case "string":
-                return this.translateDimension(value, dimension);
-            case "function":
-                return value(this);
-            case "number":
-                return value;
-            default:
-                return 0;
-        }
+    setClip(bool = true) {
+        return this.setProp("clip", bool);
     }
 
     /**
@@ -330,7 +376,7 @@ Linen.Model = class {
     }
 
     /**
-     * Set the value of a given property.
+     * Set the value of a given property. This should probably not be used directly.
      * @param {string} prop - property name.
      * @param {*} value - mixed value
      * @return {self} self
@@ -338,76 +384,6 @@ Linen.Model = class {
     setProp(prop, value) {
         this[prop] = value;
         return this;
-    }
-
-    /**
-     * Get the canvas' context
-     * @return {CanvasRenderingContext2D} instance of 2d context of Canvas
-     */
-    context() {
-        return this.Linen.context();
-    }
-
-    /**
-     * 
-     * @param {string|number} value - The dimension raw value.
-     * @param {string} dimension - The dimension name.
-     * @returns {number} dimension in px
-     */
-
-    translateDimension(value, dimension = "") {
-        return this.translateToPx(value, dimension);
-    }
-
-    translateToPx(value, dimension = "") {
-        if (typeof value !== "string") {
-            return value;
-        }
-        const pattern = /^([0-9.]+)([^0-9]+)/i;
-        const parts = value.match(pattern);
-        const number = parseFloat(parts[1]);
-        const unit = parts[2].toLowerCase();
-        switch (unit) {
-            case "%":
-                return Math.round(this.percentage(number, dimension));
-            case "pt":
-                return Math.round(number * (this.dpi() / 72));
-            case "in":
-                return Math.round(number * this.dpi());
-            default:
-                return number + "px";
-    }
-    }
-
-    /**
-     * Set the value of a given propery. Primarily for 2d attributes.
-     * @param {number} px - px value to compare from.
-     * @param {string} dimension - dimension name.
-     * @return {number} px
-     */
-    percentage(px, dimension = "") {
-        const n = px / 100;
-        var o = 0;
-        switch (dimension) {
-            case "width":
-            case "x":
-            case "x2":
-                o = this.context().canvas.width;
-                break;
-            case "height":
-            case "y":
-            case "y2":
-                o = this.context().canvas.height;
-                break;
-            default:
-                return 0;
-        }
-        return n * o;
-    }
-
-    render() {
-        Object.assign(this.Linen.ctx, this.settings);
-        this.setFont();
     }
 
     /**
@@ -436,7 +412,7 @@ Linen.Model = class {
 
     /**
      * Set the font to be used for rendering.
-     * @deprecated 0.1.0 Do not set font directly. Use setFontSize(), setFontFamily(), setBold(), and setItalic() on Linen.Text instead.
+     * @desription Do not set font directly. Use setFontSize(), setFontFamily(), setBold(), and setItalic() on Linen.Text instead.
      * @access private
      * @see {@link https://www.w3schools.com/tags/canvas_font.asp|w3schools}
      * @return {self} self
@@ -572,9 +548,158 @@ Linen.Model = class {
     setTextBaseline(textBaseline) {
         return this.setSetting("textBaseline", textBaseline);
     }
+    
+    /**
+     * Add a callback for when the afterRender() in ran.
+     * @param {function} callback
+     * @returns {self} self
+     */
+    setCallback(callback){
+        return this.setProp("callback", callback);
+    }
+
+    /**
+     * Private Methods
+     */
+
+    /**
+     * Get the canvas context
+     * @access private
+     * @return {CanvasRenderingContext2D} instance of 2d context of Canvas
+     */
+    context() {
+        return this.Linen.context();
+    }
+
+    /**
+     * Get the value in px of a 2d attribute.
+     * @access private
+     * @param {string} dimension - dimension name.
+     * @return {mixed} value
+     */
+    getDimension(dimension) {
+        return this.dimensions[dimension] || null;
+    }
+
+    /**
+     * Get the value in px of a 2d attribute.
+     * @access private
+     * @param {string} dimension - dimension name.
+     * @return {number} px
+     */
+    getDimensionPx(dimension) {
+        const value = this.getDimension(dimension);
+        if (value === null) {
+            return 0;
+        }
+        const type = typeof value;
+        switch (type) {
+            case "string":
+                return this.translateToPx(value, dimension);
+            case "function":
+                return value(this);
+            case "number":
+                return value;
+            default:
+                return 0;
+        }
+    }
+
+    /**
+     * Translate a string into a px value in the context of the given dimension.
+     * @access private
+     * @param {string} value - The dimension raw value.
+     * @param {string} dimension - The dimension name.
+     * @returns {number} dimension in px
+     */
+
+    translateToPx(value, dimension = "") {
+        if (typeof value !== "string") {
+            return value;
+        }
+        const pattern = /^([0-9.]+)([^0-9]+)/i;
+        const parts = value.match(pattern);
+        const number = parseFloat(parts[1]);
+        const unit = parts[2].toLowerCase();
+        switch (unit) {
+            case "%":
+                return Math.round(this.percentage(number, dimension));
+            case "pt":
+                return Math.round(number * (this.dpi() / 72));
+            case "in":
+                return Math.round(number * this.dpi());
+            default:
+                return number + "px";
+    }
+    }
+
+    /**
+     * Set the value of a given propery. Primarily for 2d attributes.
+     * @access private
+     * @param {number} px - px value to compare from.
+     * @param {string} dimension - dimension name.
+     * @return {number} px
+     */
+    percentage(number, dimension = "") {
+        const ratio = number / 100;
+        var aspect = 0;
+        switch (dimension) {
+            case "width":
+            case "x":
+            case "x2":
+                aspect = this.context().canvas.width;
+                break;
+            case "height":
+            case "y":
+            case "y2":
+                aspect = this.context().canvas.height;
+                break;
+            default:
+                return 0;
+        }
+        return ratio * aspect;
+    }
+
+    /**
+     * This method is executed before rendering the element. Do not call it directly.
+     * @access private
+     */
+    render() {
+        Object.assign(this.Linen.ctx, this.settings);
+        this.setFont();
+        this.context().resetTransform();
+        if (typeof this.transform === "object") {
+            const t = this.transform;
+            this.context().transform(t.a, t.b, t.c, t.d, t.e, t.f);
+        }
+        return this;
+    }
+
+    /**
+     * This method is executed after rendering the element. Do not call it directly.
+     * @access private
+     */
+    afterRender() {
+        if (this.clip) {
+            this.context().clip();
+        }
+        this.runCallback();
+        this.Linen.renderQueued();
+        return this;
+    }
+    
+    /**
+     * This method is executed after rendering the element. Do not call it directly.
+     * @access private
+     */
+    runCallback(){
+        return this.callback();
+    }
 };
 /**
- * Model for drawing rectangles
+ * Model for drawing rectangles.<br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
+ * @tutorial rectangle
  */
 Linen.Rectangle = class extends Linen.Model {
 
@@ -587,6 +712,7 @@ Linen.Rectangle = class extends Linen.Model {
 
     /**
      * Render the Rectangle on the Linen.canvas object
+     * @access private
      */
     render() {
         super.render();
@@ -602,10 +728,12 @@ Linen.Rectangle = class extends Linen.Model {
         if (this.stroke) {
             this.context().stroke();
         }
+        return this;
     }
 };
 /**
- * Model for drawing arcs (circle/oval)
+ * Model for drawing arcs (circle/oval).<br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
  */
 Linen.Arc = class extends Linen.Model {
 
@@ -654,11 +782,13 @@ Linen.Arc = class extends Linen.Model {
         if (this.stroke) {
             this.context().stroke();
         }
+        return this;
     }
 };
 /**
- * Model for drawing images
-*/
+ * Model for drawing images.<br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
+ */
 Linen.Image = class extends Linen.Model {
 
     /**
@@ -669,6 +799,7 @@ Linen.Image = class extends Linen.Model {
         this.dimensions.width = 0;
         this.dimensions.height = 0;
         this.img = new Image;
+        this.loaded = false;
     }
 
     /**
@@ -683,13 +814,24 @@ Linen.Image = class extends Linen.Model {
 
     /**
      * Render the Image on the Linen.Canvas object
+     * @access private
      */
     render() {
         super.render()
         this.img.addEventListener("load", function () {
+            console.log("Image loaded: ", this.img.src);
             this.drawImage();
+            this.runCallback();
+            this.Linen.renderQueued();
         }.bind(this), false);
+        return this;
     }
+
+    /**
+     * Prevent the rendering queue from continuing until image loads
+     * @access private
+     */
+    afterRender() { }
 
     /**
      * Private callback method executed after image "load" event.
@@ -711,7 +853,8 @@ Linen.Image = class extends Linen.Model {
     }
 };
 /**
- * Model for drawing lines
+ * Model for drawing lines<br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
 */
 Linen.Line = class extends Linen.Model {
 
@@ -754,14 +897,27 @@ Linen.Line = class extends Linen.Model {
         this.context().moveTo(x1, y1);
         this.context().lineTo(x2, y2);
         this.context().stroke();
+        return this;
+    }
+    
+    /**
+     * `alignment` is currently not supported on Line element.
+     * @param {string} alignment
+     * @returns {self} self
+     */
+    setAlignment(alignment){
+        console.log("`alignment` is currently not supported on Line element.");
+        return this;
     }
 };
 /**
- * Model for drawing text
+ * Model for drawing text.<br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
  */
 Linen.Text = class extends Linen.Model {
 
     /**
+     * 
      * @param {Linen} Linen - The instance of Linen.
      */
     constructor(Linen) {
@@ -775,7 +931,7 @@ Linen.Text = class extends Linen.Model {
      * @param {boolean} bool
      * @returns {self} self
      */
-    setWrap(bool) {
+    setWrap(bool = true) {
         return this.setProp('wrap', bool);
     }
 
@@ -794,7 +950,7 @@ Linen.Text = class extends Linen.Model {
      * @return {self} self
      */
     setFontFamily(fontFamily) {
-        return this.setSetting('fontSize', fontFamily);
+        return this.setSetting('fontFamily', fontFamily);
     }
 
     /**
@@ -805,10 +961,33 @@ Linen.Text = class extends Linen.Model {
     setFontSize(fontSize) {
         return this.setSetting('fontSize', this.translateToPx(fontSize));
     }
+
+    /**
+     * Set the font to be Bold
+     * @param {boolean} bool
+     * @returns {self} self
+     */
+    setBold(bool = true) {
+        return this.setSetting('bold', bool);
+    }
+
+    /**
+     * Set the font to be Italic
+     * @param {boolean} bool
+     * @returns {self} self
+     */
+    setItalic(bool = true) {
+        return this.setSetting('italic', bool);
+    }
     
+    setTextLineHeight(textLineHeight){
+        return this.setSetting('textLineHeight', textLineHeight);
+    }
+
     /**
      * Render the Text on the Linen.Canvas object
      * Splits the text into lines and sends it to private methods for wrapping.
+     * @access private
      */
     render() {
         super.render();
@@ -831,8 +1010,10 @@ Linen.Text = class extends Linen.Model {
             this.writeLine(line, x, y);
             y += this.textHeight(line);
         });
+        
+        return this;
     }
-    
+
     /* Private Functions */
 
     /**
@@ -963,5 +1144,107 @@ Linen.Text = class extends Linen.Model {
             newLines.push(newLine);
         });
         return newLines;
+    }
+};
+/**
+ * Model for embedding another canvas onto another canvas.<br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
+ * @tutorial advanced1
+ */
+Linen.Canvas = class extends Linen.Model {
+
+    /**
+     * @param {Linen} Linen - The instance of Linen.
+     */
+    constructor(Linen) {
+        super(Linen);
+        this.canvas = null
+    }
+    
+    /**
+     * 
+     * @param {HTMLCanvasElement} canvas - accepts a HTML5 canvas element.
+     * @returns {self} self
+     */
+    setCanvas(canvas){
+        return this.setProp('canvas', canvas);
+    }
+
+    /**
+     * Render the Rectangle on the Linen.canvas object
+     * @access private
+     */
+    render() {
+        super.render();
+        var width = super.width();
+        var height = super.height();
+        if (width < 1) {
+            width = this.dimensions.width = this.canvas.width;
+        }
+        if (height < 1) {
+            height = this.dimensions.height = this.canvas.height;
+        }
+        var x = super.x();
+        var y = super.y();
+        
+        this.context().drawImage(this.canvas, x, y);
+        return this;
+    }
+};
+/**
+ * Model for drawing Paths. The model is extremely limited right now.<br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
+ * @tutorial path-clipping
+ */
+Linen.Path = class extends Linen.Model {
+
+    /**
+     * @param {Linen} Linen - The instance of Linen.
+     */
+    constructor(Linen) {
+        super(Linen);
+        this.paths = [];
+    }
+
+    /**
+     * Multiple paths may be added to the Path element for ease of use.
+     * All paths on the element will recieve the same fillStyle and strokeStyle.
+     * @param {string} path
+     * @returns {unresolved}
+     */
+    addPath(path) {
+        this.paths.push(new Path2D(path));
+        return this;
+    }
+
+    /**
+     * Render the Rectangle on the Linen.canvas object
+     * @access private
+     */
+    render() {
+        super.render();
+        this.context().translate(this.x(), this.y());
+        this.paths.map((Path) => {
+            this.context().beginPath();
+            if (this.fill) {
+                this.context().fill(Path);
+            }
+            if (this.stroke) {
+                this.context().stroke(Path);
+            }
+            if (this.clip) {
+                this.context().clip(Path);
+            }
+        });
+        return this;
+    }
+
+    /**
+     * Prevent the default clip behavior.
+     * @access private
+     */
+    afterRender() {
+        this.Linen.renderQueued();
+        return this;
     }
 };

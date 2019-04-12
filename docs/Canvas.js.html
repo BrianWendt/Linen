@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>Home - Documentation</title>
+    <title>Canvas.js - Documentation</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -33,38 +33,64 @@
 
 <div id="main">
     
+    <h1 class="page-title">Canvas.js</h1>
+    
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Model for embedding another canvas onto another canvas.&lt;br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
+ * @tutorial advanced1
+ */
+Linen.Canvas = class extends Linen.Model {
 
+    /**
+     * @param {Linen} Linen - The instance of Linen.
+     */
+    constructor(Linen) {
+        super(Linen);
+        this.canvas = null
+    }
+    
+    /**
+     * 
+     * @param {HTMLCanvasElement} canvas - accepts a HTML5 canvas element.
+     * @returns {self} self
+     */
+    setCanvas(canvas){
+        return this.setProp('canvas', canvas);
+    }
 
-    <section class="package">
-        <h3> </h3>		
+    /**
+     * Render the Rectangle on the Linen.canvas object
+     * @access private
+     */
+    render() {
+        super.render();
+        var width = super.width();
+        var height = super.height();
+        if (width &lt; 1) {
+            width = this.dimensions.width = this.canvas.width;
+        }
+        if (height &lt; 1) {
+            height = this.dimensions.height = this.canvas.height;
+        }
+        var x = super.x();
+        var y = super.y();
+        
+        this.context().drawImage(this.canvas, x, y);
+        return this;
+    }
+};
+</code></pre>
+        </article>
     </section>
-
-
-
-
-
-
-
-
-
-    
-
-
-
-    <section class="readme">
-        <article><h1>Linen.js</h1><p>Linen.js is a Javascript library for the HTML5 Canvas API designed to simplify 2d drawing for common tasks.</p>
-<h2>Background</h2><p>The Linen library started out as a way to expedite printed and digital prototyping of card games. The name &quot;Linen&quot; comes from a printed asset finish called &quot;linen&quot; that is commonly used on playing cards.</p>
-<h2>Development</h2><p>Linen could use some help if it is to become usable in projects. Completed documentation including examples would be a good start. </p>
-<h2>Documentation</h2><p>You can find <a href="https://github.com/BrianWendt/Linen/wiki/Examples">examples here</a>.</p></article>
-    </section>
-
-
 
 
 

@@ -1,5 +1,7 @@
 /**
- * Model for drawing rectangles
+ * Model for drawing rectangles.<br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
+ * @tutorial rectangle
  */
 Linen.Rectangle = class extends Linen.Model {
 
@@ -12,6 +14,7 @@ Linen.Rectangle = class extends Linen.Model {
 
     /**
      * Render the Rectangle on the Linen.canvas object
+     * @access private
      */
     render() {
         super.render();
@@ -27,5 +30,6 @@ Linen.Rectangle = class extends Linen.Model {
         if (this.stroke) {
             this.context().stroke();
         }
+        return this;
     }
 };

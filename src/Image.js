@@ -1,6 +1,7 @@
 /**
- * Model for drawing images
-*/
+ * Model for drawing images.<br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
+ */
 Linen.Image = class extends Linen.Model {
 
     /**
@@ -11,6 +12,7 @@ Linen.Image = class extends Linen.Model {
         this.dimensions.width = 0;
         this.dimensions.height = 0;
         this.img = new Image;
+        this.loaded = false;
     }
 
     /**
@@ -25,13 +27,24 @@ Linen.Image = class extends Linen.Model {
 
     /**
      * Render the Image on the Linen.Canvas object
+     * @access private
      */
     render() {
         super.render()
         this.img.addEventListener("load", function () {
+            console.log("Image loaded: ", this.img.src);
             this.drawImage();
+            this.runCallback();
+            this.Linen.renderQueued();
         }.bind(this), false);
+        return this;
     }
+
+    /**
+     * Prevent the rendering queue from continuing until image loads
+     * @access private
+     */
+    afterRender() { }
 
     /**
      * Private callback method executed after image "load" event.

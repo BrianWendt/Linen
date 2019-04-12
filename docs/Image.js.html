@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>Home - Documentation</title>
+    <title>Image.js - Documentation</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -33,38 +33,86 @@
 
 <div id="main">
     
+    <h1 class="page-title">Image.js</h1>
+    
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Model for drawing images.&lt;br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
+ */
+Linen.Image = class extends Linen.Model {
 
+    /**
+     * @param {Linen} Linen - The instance of Linen.
+     */
+    constructor(Linen) {
+        super(Linen);
+        this.dimensions.width = 0;
+        this.dimensions.height = 0;
+        this.img = new Image;
+        this.loaded = false;
+    }
 
-    <section class="package">
-        <h3> </h3>		
+    /**
+     * Set the url of the image.
+     * @param {string} url - fully qualified URL of image to use
+     * @return {self} self
+     */
+    setSrc(url) {
+        this.img.src = url;
+        return this;
+    }
+
+    /**
+     * Render the Image on the Linen.Canvas object
+     * @access private
+     */
+    render() {
+        super.render()
+        this.img.addEventListener("load", function () {
+            console.log("Image loaded: ", this.img.src);
+            this.drawImage();
+            this.runCallback();
+            this.Linen.renderQueued();
+        }.bind(this), false);
+        return this;
+    }
+
+    /**
+     * Prevent the rendering queue from continuing until image loads
+     * @access private
+     */
+    afterRender() { }
+
+    /**
+     * Private callback method executed after image "load" event.
+     * @access private
+     */
+    drawImage() {
+        var width = super.width();
+        var height = super.height();
+        if (width &lt; 1) {
+            width = this.dimensions.width = this.img.width;
+        }
+        if (height &lt; 1) {
+            height = this.dimensions.height = this.img.height;
+        }
+        var x = super.x();
+        var y = super.y();
+
+        this.context().drawImage(this.img, x, y, width, height);
+    }
+};
+</code></pre>
+        </article>
     </section>
-
-
-
-
-
-
-
-
-
-    
-
-
-
-    <section class="readme">
-        <article><h1>Linen.js</h1><p>Linen.js is a Javascript library for the HTML5 Canvas API designed to simplify 2d drawing for common tasks.</p>
-<h2>Background</h2><p>The Linen library started out as a way to expedite printed and digital prototyping of card games. The name &quot;Linen&quot; comes from a printed asset finish called &quot;linen&quot; that is commonly used on playing cards.</p>
-<h2>Development</h2><p>Linen could use some help if it is to become usable in projects. Completed documentation including examples would be a good start. </p>
-<h2>Documentation</h2><p>You can find <a href="https://github.com/BrianWendt/Linen/wiki/Examples">examples here</a>.</p></article>
-    </section>
-
-
 
 
 

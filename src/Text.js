@@ -1,9 +1,11 @@
 /**
- * Model for drawing text
+ * Model for drawing text.<br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
  */
 Linen.Text = class extends Linen.Model {
 
     /**
+     * 
      * @param {Linen} Linen - The instance of Linen.
      */
     constructor(Linen) {
@@ -17,7 +19,7 @@ Linen.Text = class extends Linen.Model {
      * @param {boolean} bool
      * @returns {self} self
      */
-    setWrap(bool) {
+    setWrap(bool = true) {
         return this.setProp('wrap', bool);
     }
 
@@ -36,7 +38,7 @@ Linen.Text = class extends Linen.Model {
      * @return {self} self
      */
     setFontFamily(fontFamily) {
-        return this.setSetting('fontSize', fontFamily);
+        return this.setSetting('fontFamily', fontFamily);
     }
 
     /**
@@ -47,10 +49,33 @@ Linen.Text = class extends Linen.Model {
     setFontSize(fontSize) {
         return this.setSetting('fontSize', this.translateToPx(fontSize));
     }
+
+    /**
+     * Set the font to be Bold
+     * @param {boolean} bool
+     * @returns {self} self
+     */
+    setBold(bool = true) {
+        return this.setSetting('bold', bool);
+    }
+
+    /**
+     * Set the font to be Italic
+     * @param {boolean} bool
+     * @returns {self} self
+     */
+    setItalic(bool = true) {
+        return this.setSetting('italic', bool);
+    }
     
+    setTextLineHeight(textLineHeight){
+        return this.setSetting('textLineHeight', textLineHeight);
+    }
+
     /**
      * Render the Text on the Linen.Canvas object
      * Splits the text into lines and sends it to private methods for wrapping.
+     * @access private
      */
     render() {
         super.render();
@@ -73,8 +98,10 @@ Linen.Text = class extends Linen.Model {
             this.writeLine(line, x, y);
             y += this.textHeight(line);
         });
+        
+        return this;
     }
-    
+
     /* Private Functions */
 
     /**

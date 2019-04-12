@@ -1,5 +1,6 @@
 /**
- * Model for drawing arcs (circle/oval)
+ * Model for drawing arcs (circle/oval).<br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
  */
 Linen.Arc = class extends Linen.Model {
 
@@ -48,5 +49,6 @@ Linen.Arc = class extends Linen.Model {
         if (this.stroke) {
             this.context().stroke();
         }
+        return this;
     }
 };

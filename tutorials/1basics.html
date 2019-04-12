@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <script src="../linen.js"></script>
+        
+        <script> window.onload = function () { eval(document.getElementById("example").innerText); }; </script>
+        
+        <pre class="prettyprint source" id="example">/* Get canvas HTML element */
+var canvas = document.getElementById("canvas");
+
+/* Create a Linen instance for the canvas element. */
+var Canvas = new Linen(canvas);
+
+/* Draw a rectangle that is centered in the canvas */
+Canvas.addElement("Rectangle")
+        .setWidth("60%")
+        .setHeight(100)
+        .setXY("50%", 50)
+        .setAlignment("center")
+        .setFillStyle("green")
+        .setFill();
+
+/* Draw a circle that is 100px in diameter and 100px from the left */
+Canvas.addElement("Arc")
+        .setRadius(50)
+        .setXY(100, 200)
+        .setFillStyle("red")
+        .setFill();
+
+/* Draw an image that is 400x100 (source) that is centered on the canvas */
+Canvas.addElement("Image")
+        .setSrc("http://placekitten.com/400/100")
+        .setXY("50%", 350)
+        .setAlignment("center");
+
+/* Draw a line that goes from 100px from the left to the right most of the canvas. */
+Canvas.addElement("Line")
+        .setCords(100, 500, "100%", 500)
+        .setLineWidth("1pt")
+        .setStrokeStyle("orange");
+
+/* Draw text that is centered and fits within 100px width. */
+Canvas.addElement("Text").
+        setText("ABCDEFGHI").
+        setFontSize("18pt")
+        .setFill()
+        .setXY(100, 650)
+        .setWidth(100)
+        .setTextAlign("center");
+
+/* Draw text that is centered and fits within 100px height and width. */
+Canvas.addElement("Text").
+        setText("A\nB\nC\nD\nE").
+        setFontSize("22pt")
+        .setStroke()
+        .setXY(100, 800)
+        .setWidth(100)
+        .setHeight(100)
+        .setTextAlign("center");
+
+/* Draw text that is right aligned and fits within 100px height and width that and wraps. */
+Canvas.addElement("Text").
+        setText("A B C D E F G H I J K L M N O P Q R S").
+        setFontSize("12pt")
+        .setFill(true)
+        .setXY(100, 950)
+        .setWidth(100)
+        .setHeight(100)
+        .setWrap()
+        .setTextAlign("right");
+
+/* Draw a background behind everything by using the zindex setting. */
+Canvas.addElement("Rectangle")
+        .setSetting("zindex", 0)
+        .setWidth("100%")
+        .setHeight("100%")
+        .setXY(0, 0)
+        .setFillStyle("#EEE")
+        .setFill();
+
+/* Render the elements above onto the canvas. */
+Canvas.render();</pre>
+        
+        <canvas id="canvas" width="1000" height="1200"></canvas>
+    </body>
+</html>

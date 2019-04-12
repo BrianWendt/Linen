@@ -1,5 +1,6 @@
 /**
- * Model for drawing lines
+ * Model for drawing lines<br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
 */
 Linen.Line = class extends Linen.Model {
 
@@ -42,5 +43,16 @@ Linen.Line = class extends Linen.Model {
         this.context().moveTo(x1, y1);
         this.context().lineTo(x2, y2);
         this.context().stroke();
+        return this;
+    }
+    
+    /**
+     * `alignment` is currently not supported on Line element.
+     * @param {string} alignment
+     * @returns {self} self
+     */
+    setAlignment(alignment){
+        console.log("`alignment` is currently not supported on Line element.");
+        return this;
     }
 };

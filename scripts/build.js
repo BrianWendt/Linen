@@ -11,7 +11,9 @@ const input = [
         './src/Arc.js',
         './src/Image.js',
         './src/Line.js',
-        './src/Text.js'
+        './src/Text.js',
+        './src/Canvas.js',
+        './src/Path.js'
     ];
 
 console.log('** Merge files into Linen.js **');

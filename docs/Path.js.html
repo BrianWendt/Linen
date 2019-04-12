@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>Home - Documentation</title>
+    <title>Path.js - Documentation</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -33,38 +33,75 @@
 
 <div id="main">
     
+    <h1 class="page-title">Path.js</h1>
+    
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Model for drawing Paths. The model is extremely limited right now.&lt;br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
+ * @tutorial path-clipping
+ */
+Linen.Path = class extends Linen.Model {
 
+    /**
+     * @param {Linen} Linen - The instance of Linen.
+     */
+    constructor(Linen) {
+        super(Linen);
+        this.paths = [];
+    }
 
-    <section class="package">
-        <h3> </h3>		
+    /**
+     * Multiple paths may be added to the Path element for ease of use.
+     * All paths on the element will recieve the same fillStyle and strokeStyle.
+     * @param {string} path
+     * @returns {unresolved}
+     */
+    addPath(path) {
+        this.paths.push(new Path2D(path));
+        return this;
+    }
+
+    /**
+     * Render the Rectangle on the Linen.canvas object
+     * @access private
+     */
+    render() {
+        super.render();
+        this.context().translate(this.x(), this.y());
+        this.paths.map((Path) => {
+            this.context().beginPath();
+            if (this.fill) {
+                this.context().fill(Path);
+            }
+            if (this.stroke) {
+                this.context().stroke(Path);
+            }
+            if (this.clip) {
+                this.context().clip(Path);
+            }
+        });
+        return this;
+    }
+
+    /**
+     * Prevent the default clip behavior.
+     * @access private
+     */
+    afterRender() {
+        this.Linen.renderQueued();
+        return this;
+    }
+};</code></pre>
+        </article>
     </section>
-
-
-
-
-
-
-
-
-
-    
-
-
-
-    <section class="readme">
-        <article><h1>Linen.js</h1><p>Linen.js is a Javascript library for the HTML5 Canvas API designed to simplify 2d drawing for common tasks.</p>
-<h2>Background</h2><p>The Linen library started out as a way to expedite printed and digital prototyping of card games. The name &quot;Linen&quot; comes from a printed asset finish called &quot;linen&quot; that is commonly used on playing cards.</p>
-<h2>Development</h2><p>Linen could use some help if it is to become usable in projects. Completed documentation including examples would be a good start. </p>
-<h2>Documentation</h2><p>You can find <a href="https://github.com/BrianWendt/Linen/wiki/Examples">examples here</a>.</p></article>
-    </section>
-
-
 
 
 

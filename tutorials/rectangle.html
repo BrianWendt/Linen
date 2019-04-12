@@ -1,0 +1,26 @@
+
+<script src="../linen.js"></script>
+
+<script>window.onload = function () { eval(document.getElementById("example").innerText); };</script>
+
+<pre class="prettyprint source" id="example">/* 
+/* Get canvas HTML element */
+var canvas = document.getElementById("canvas");
+
+/* Create a Linen instance for the canvas element. */
+var Canvas = new Linen(canvas);
+
+/* Draw a rectangle that is centered in the canvas */
+Canvas.addElement("Rectangle")
+        .setWidth("50%") //width in px, in, pt, or % of canvas width
+        .setHeight(300) //height in px, in, pt, or % of canvas height
+        .setXY("50%", 350) //x and y position in px, in, pt, or % of canvas width and height, respectively
+        .setAlignment("center") //the horizontal point to use for positioning the rectangle (left|center|right)
+        .setVAlignment("middle") //the vertical point to use for positioning the rectangle (top|middle|bottom)
+        .setFillStyle("rgba(150,10,10, .5)") //the color to fill the rectangle with.
+        .setFill(); //tells Linen to fill the rectangle
+
+/* Render the elements above onto the canvas. */
+Canvas.render();</pre>
+
+<canvas id="canvas" width="600" height="700"></canvas>

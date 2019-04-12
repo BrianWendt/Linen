@@ -1,0 +1,44 @@
+
+<script src="../linen.js"></script>
+
+<script>window.onload = function () { eval(document.getElementById("example").innerText); };</script>
+
+<pre class="prettyprint source" id="example">/* 
+ * Lets extend the Linen.Text element to make a Title element for re-use.
+ */
+
+Linen.Title = class extends Linen.Text {
+    constructor(Linen) {
+        super(Linen);
+        this.setFontSize('28pt')
+                .setFontFamily('Impact');
+    }
+};
+
+/*
+ * Now we'll extend the Linen.Title element to make a Sub Title element.
+ */
+Linen.SubTitle = class extends Linen.Title {
+    constructor(Linen) {
+        super(Linen);
+        this.setFontSize('16pt')
+                .setFillStyle('#666')
+                .setItalic();
+    }
+};
+
+/* Get canvas HTML element */
+var canvas = document.getElementById("canvas");
+
+/* Create a Linen instance for the canvas element. */
+var Canvas = new Linen(canvas);
+
+/* Draw the Title element onto the canvas */
+Canvas.addElement('Title').setText('The Title').setXY(10, 10).setFill(true);
+/* Draw the SubTitle element onto the canvas */
+Canvas.addElement('SubTitle').setText('The Sub Title').setXY(10, "32pt").setFill(true);
+
+/* Render the elements above onto the canvas. */
+Canvas.render();</pre>
+
+<canvas id="canvas" width="1000" height="1200"></canvas>

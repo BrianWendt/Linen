@@ -1,5 +1,5 @@
 /**
- * All 
+ * All other Linen elements extend this Model.
  */
 Linen.Model = class {
 
@@ -43,7 +43,9 @@ Linen.Model = class {
 
         this.fill = false;
         this.stroke = false;
-
+        this.clip = false;
+        this.trasform = false;
+        this.callback = function(){}
     }
 
     /**
@@ -77,7 +79,7 @@ Linen.Model = class {
     x() {
         var x = this.getDimensionPx("x"); //px
         var w = this.width(); //px
-        switch (this.getDimension("alignment")) {
+        switch (this.settings.alignment) {
             case "center":
                 return x - (w / 2);
             case "right":
@@ -150,15 +152,15 @@ Linen.Model = class {
 
     /**
      * Set the x reference point for positioning
-     * @param {string} val - left(default)|center|right
+     * @param {'left' | 'center' | 'right'} [alignment=left] - left|center|right
      * @return {self} self
      */
-    setAlignment(val) {
-        return this.setSetting("alignment", val.toLowerCase());
+    setAlignment(alignment = 'left') {
+        return this.setSetting("alignment", alignment.toLowerCase());
     }
 
     /**
-     * Set the reference point for positioning to center
+     * Shorthand to set the reference point for positioning to center
      * @return {self} self
      */
     center() {
@@ -167,15 +169,15 @@ Linen.Model = class {
 
     /**
      * Set the y reference point for positioning
-     * @param {string} val - top(default)|middle|bottom
+     * @param {'top' | 'middle' | 'bottom'} [v_alignment=top] - top|middle|bottom
      * @return {self} self
      */
-    setVAlignment(val) {
-        return this.setSetting("v_alignment", val.toLowerCase());
+    setVAlignment(v_alignment = "top") {
+        return this.setSetting("v_alignment", v_alignment.toLowerCase());
     }
 
     /**
-     * Set the y reference point for positioning to bottom
+     * Shorthand to set the y reference point for positioning to bottom
      * @return {self} self
      */
     middle() {
@@ -183,11 +185,26 @@ Linen.Model = class {
     }
 
     /**
+     * Set the transform to be used on 
+     * @see {@link https://www.w3schools.com/tags/canvas_transform.asp|w3schools}
+     * @param {type} a - Horizontal scaling. A value of 1 results in no scaling.
+     * @param {type} b - Vertical skewing.
+     * @param {type} c - Horizontal skewing.
+     * @param {type} d - Vertical scaling. A value of 1 results in no scaling.
+     * @param {type} e - Horizontal translation (moving).
+     * @param {type} f - Vertical translation (moving).
+     * @returns {self} self
+     */
+    setTransorm(a = 1, b = 0, c = 0, d = 1, e = 0, f = 0) {
+        return this.setProp("transform", {"a": a, "b": b, "c": c, "d": d, "e": e, "f": f});
+    }
+
+    /**
      * Enable or disable rendering the fill
      * @param {bool} bool - TRUE|FALSE
      * @return {self} self
      */
-    setFill(bool) {
+    setFill(bool = true) {
         return this.setProp("fill", bool);
     }
 
@@ -196,40 +213,17 @@ Linen.Model = class {
      * @param {bool} bool - TRUE|FALSE
      * @return {self} self
      */
-    setStroke(bool) {
+    setStroke(bool = true) {
         return this.setProp("stroke", bool);
     }
 
     /**
-     * Get the value in px of a 2d attribute.
-     * @param {string} dimension - dimension name.
-     * @return {mixed} value
+     * Enable or disable using the path as a clipping mask.
+     * @param {bool} bool - TRUE|FALSE
+     * @return {self} self
      */
-    getDimension(dimension) {
-        return this.dimensions[dimension] || null;
-    }
-
-    /**
-     * Get the value in px of a 2d attribute.
-     * @param {string} dimension - dimension name.
-     * @return {number} px
-     */
-    getDimensionPx(dimension) {
-        const value = this.getDimension(dimension);
-        if (value === null) {
-            return 0;
-        }
-        const type = typeof value;
-        switch (type) {
-            case "string":
-                return this.translateDimension(value, dimension);
-            case "function":
-                return value(this);
-            case "number":
-                return value;
-            default:
-                return 0;
-        }
+    setClip(bool = true) {
+        return this.setProp("clip", bool);
     }
 
     /**
@@ -264,7 +258,7 @@ Linen.Model = class {
     }
 
     /**
-     * Set the value of a given property.
+     * Set the value of a given property. This should probably not be used directly.
      * @param {string} prop - property name.
      * @param {*} value - mixed value
      * @return {self} self
@@ -272,76 +266,6 @@ Linen.Model = class {
     setProp(prop, value) {
         this[prop] = value;
         return this;
-    }
-
-    /**
-     * Get the canvas' context
-     * @return {CanvasRenderingContext2D} instance of 2d context of Canvas
-     */
-    context() {
-        return this.Linen.context();
-    }
-
-    /**
-     * 
-     * @param {string|number} value - The dimension raw value.
-     * @param {string} dimension - The dimension name.
-     * @returns {number} dimension in px
-     */
-
-    translateDimension(value, dimension = "") {
-        return this.translateToPx(value, dimension);
-    }
-
-    translateToPx(value, dimension = "") {
-        if (typeof value !== "string") {
-            return value;
-        }
-        const pattern = /^([0-9.]+)([^0-9]+)/i;
-        const parts = value.match(pattern);
-        const number = parseFloat(parts[1]);
-        const unit = parts[2].toLowerCase();
-        switch (unit) {
-            case "%":
-                return Math.round(this.percentage(number, dimension));
-            case "pt":
-                return Math.round(number * (this.dpi() / 72));
-            case "in":
-                return Math.round(number * this.dpi());
-            default:
-                return number + "px";
-    }
-    }
-
-    /**
-     * Set the value of a given propery. Primarily for 2d attributes.
-     * @param {number} px - px value to compare from.
-     * @param {string} dimension - dimension name.
-     * @return {number} px
-     */
-    percentage(px, dimension = "") {
-        const n = px / 100;
-        var o = 0;
-        switch (dimension) {
-            case "width":
-            case "x":
-            case "x2":
-                o = this.context().canvas.width;
-                break;
-            case "height":
-            case "y":
-            case "y2":
-                o = this.context().canvas.height;
-                break;
-            default:
-                return 0;
-        }
-        return n * o;
-    }
-
-    render() {
-        Object.assign(this.Linen.ctx, this.settings);
-        this.setFont();
     }
 
     /**
@@ -370,7 +294,7 @@ Linen.Model = class {
 
     /**
      * Set the font to be used for rendering.
-     * @deprecated 0.1.0 Do not set font directly. Use setFontSize(), setFontFamily(), setBold(), and setItalic() on Linen.Text instead.
+     * @desription Do not set font directly. Use setFontSize(), setFontFamily(), setBold(), and setItalic() on Linen.Text instead.
      * @access private
      * @see {@link https://www.w3schools.com/tags/canvas_font.asp|w3schools}
      * @return {self} self
@@ -505,5 +429,152 @@ Linen.Model = class {
      */
     setTextBaseline(textBaseline) {
         return this.setSetting("textBaseline", textBaseline);
+    }
+    
+    /**
+     * Add a callback for when the afterRender() in ran.
+     * @param {function} callback
+     * @returns {self} self
+     */
+    setCallback(callback){
+        return this.setProp("callback", callback);
+    }
+
+    /**
+     * Private Methods
+     */
+
+    /**
+     * Get the canvas context
+     * @access private
+     * @return {CanvasRenderingContext2D} instance of 2d context of Canvas
+     */
+    context() {
+        return this.Linen.context();
+    }
+
+    /**
+     * Get the value in px of a 2d attribute.
+     * @access private
+     * @param {string} dimension - dimension name.
+     * @return {mixed} value
+     */
+    getDimension(dimension) {
+        return this.dimensions[dimension] || null;
+    }
+
+    /**
+     * Get the value in px of a 2d attribute.
+     * @access private
+     * @param {string} dimension - dimension name.
+     * @return {number} px
+     */
+    getDimensionPx(dimension) {
+        const value = this.getDimension(dimension);
+        if (value === null) {
+            return 0;
+        }
+        const type = typeof value;
+        switch (type) {
+            case "string":
+                return this.translateToPx(value, dimension);
+            case "function":
+                return value(this);
+            case "number":
+                return value;
+            default:
+                return 0;
+        }
+    }
+
+    /**
+     * Translate a string into a px value in the context of the given dimension.
+     * @access private
+     * @param {string} value - The dimension raw value.
+     * @param {string} dimension - The dimension name.
+     * @returns {number} dimension in px
+     */
+
+    translateToPx(value, dimension = "") {
+        if (typeof value !== "string") {
+            return value;
+        }
+        const pattern = /^([0-9.]+)([^0-9]+)/i;
+        const parts = value.match(pattern);
+        const number = parseFloat(parts[1]);
+        const unit = parts[2].toLowerCase();
+        switch (unit) {
+            case "%":
+                return Math.round(this.percentage(number, dimension));
+            case "pt":
+                return Math.round(number * (this.dpi() / 72));
+            case "in":
+                return Math.round(number * this.dpi());
+            default:
+                return number + "px";
+    }
+    }
+
+    /**
+     * Set the value of a given propery. Primarily for 2d attributes.
+     * @access private
+     * @param {number} px - px value to compare from.
+     * @param {string} dimension - dimension name.
+     * @return {number} px
+     */
+    percentage(number, dimension = "") {
+        const ratio = number / 100;
+        var aspect = 0;
+        switch (dimension) {
+            case "width":
+            case "x":
+            case "x2":
+                aspect = this.context().canvas.width;
+                break;
+            case "height":
+            case "y":
+            case "y2":
+                aspect = this.context().canvas.height;
+                break;
+            default:
+                return 0;
+        }
+        return ratio * aspect;
+    }
+
+    /**
+     * This method is executed before rendering the element. Do not call it directly.
+     * @access private
+     */
+    render() {
+        Object.assign(this.Linen.ctx, this.settings);
+        this.setFont();
+        this.context().resetTransform();
+        if (typeof this.transform === "object") {
+            const t = this.transform;
+            this.context().transform(t.a, t.b, t.c, t.d, t.e, t.f);
+        }
+        return this;
+    }
+
+    /**
+     * This method is executed after rendering the element. Do not call it directly.
+     * @access private
+     */
+    afterRender() {
+        if (this.clip) {
+            this.context().clip();
+        }
+        this.runCallback();
+        this.Linen.renderQueued();
+        return this;
+    }
+    
+    /**
+     * This method is executed after rendering the element. Do not call it directly.
+     * @access private
+     */
+    runCallback(){
+        return this.callback();
     }
 };

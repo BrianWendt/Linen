@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>Home - Documentation</title>
+    <title>Rectangle.js - Documentation</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -33,38 +33,54 @@
 
 <div id="main">
     
+    <h1 class="page-title">Rectangle.js</h1>
+    
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Model for drawing rectangles.&lt;br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
+ * @tutorial rectangle
+ */
+Linen.Rectangle = class extends Linen.Model {
 
+    /**
+     * @param {Linen} Linen - The instance of Linen.
+     */
+    constructor(Linen) {
+        super(Linen);
+    }
 
-    <section class="package">
-        <h3> </h3>		
+    /**
+     * Render the Rectangle on the Linen.canvas object
+     * @access private
+     */
+    render() {
+        super.render();
+        this.context().beginPath();
+        var width = super.width();
+        var height = super.height();
+        var x = super.x();
+        var y = super.y();
+        this.context().rect(x, y, width, height);
+        if (this.fill) {
+            this.context().fill();
+        }
+        if (this.stroke) {
+            this.context().stroke();
+        }
+        return this;
+    }
+};
+</code></pre>
+        </article>
     </section>
-
-
-
-
-
-
-
-
-
-    
-
-
-
-    <section class="readme">
-        <article><h1>Linen.js</h1><p>Linen.js is a Javascript library for the HTML5 Canvas API designed to simplify 2d drawing for common tasks.</p>
-<h2>Background</h2><p>The Linen library started out as a way to expedite printed and digital prototyping of card games. The name &quot;Linen&quot; comes from a printed asset finish called &quot;linen&quot; that is commonly used on playing cards.</p>
-<h2>Development</h2><p>Linen could use some help if it is to become usable in projects. Completed documentation including examples would be a good start. </p>
-<h2>Documentation</h2><p>You can find <a href="https://github.com/BrianWendt/Linen/wiki/Examples">examples here</a>.</p></article>
-    </section>
-
-
 
 
 

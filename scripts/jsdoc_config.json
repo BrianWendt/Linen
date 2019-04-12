@@ -3,20 +3,22 @@
     "recurseDepth": 10,
     "source": {
         "include": [
-            "./src/Model.js",
             "./src/Linen.js",
+            "./src/Model.js",
             "./src/Arc.js",
             "./src/Image.js",
             "./src/Line.js",
             "./src/Rectangle.js",
-            "./src/Text.js"
+            "./src/Text.js",
+            "./src/Canvas.js",
+            "./src/Path.js"
         ]
     },
     "sourceType": "module",
     "opts": {
-        "package": "./package.json",
         "template": "node_modules/docdash",
-        "destination": "docs/"
+        "destination": "docs/",
+        "tutorials": "./tutorials"
     },
     "docdash": {
         "sectionOrder": [
