@@ -17,7 +17,7 @@ const input = [
 
 console.log('** Merge files into Linen.js **');
 mergeFiles(input, './linen.js').then(function(){
-    fs.copyFileSync('./linen.js', './docs/linen.js');
+    
 });
 
 console.log('** Minify files into linen.min.js **');
@@ -31,6 +31,7 @@ minify({
     callback: function (err, min) {
         if (err === null) {
             console.log('minify had no errors');
+            fs.copyFileSync('./linen.min.js', './docs/linen.min.js');
         } else {
             console.log('minify Error: ', err);
         }
