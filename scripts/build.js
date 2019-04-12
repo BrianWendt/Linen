@@ -1,8 +1,7 @@
 const mergeFiles = require('merge-files');
-// node-minify repo https://github.com/srod/node-minify
-// node-minify documentaion https://node-minify.2clics.net/
 const minify = require('@node-minify/core');
 const uglifyES = require('@node-minify/uglify-es');
+const fs = require('fs');
 
 const input = [
         './src/Linen.js',
@@ -17,7 +16,9 @@ const input = [
     ];
 
 console.log('** Merge files into Linen.js **');
-mergeFiles(input, './linen.js').then(function(){});
+mergeFiles(input, './linen.js').then(function(){
+    fs.copyFileSync('./linen.js', './docs/linen.js');
+});
 
 console.log('** Minify files into linen.min.js **');
 minify({

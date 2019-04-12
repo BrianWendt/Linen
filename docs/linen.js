@@ -1,49 +1,122 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    
-    <meta charset="utf-8">
-    <title>Model.js - Documentation</title>
-    
-    
-    <script src="scripts/prettify/prettify.js"></script>
-    <script src="scripts/prettify/lang-css.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
-    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
+/*
+ * This is the primary Linen class.
+ * @author Brian Wendt
+ */
+var Linen = class {
 
-<input type="checkbox" id="nav-trigger" class="nav-trigger" />
-<label for="nav-trigger" class="navicon-button x">
-  <div class="navicon"></div>
-</label>
+    /**
+     * @param {object} canvas - HTML DOM reference to canvas element
+     */
+    constructor(canvas = false) {
+        this.elements = [];
 
-<label for="nav-trigger" class="overlay"></label>
+        /*
+         dpi
+         72 - Standard Screen
+         144 - Good preview DPI
+         300 - Standard Printing DPI
+         */
+        this.dpi = 144;
+        const type = typeof canvas;
+        switch (type) {
+            case "object":
+                this.canvas = canvas;
+                break;
+            case "string":
+                this.canvas = document.querySelector(canvas);
+                break;
+            default:
+                this.canvas = document.createElement('canvas');
+        }
+        this.ctx = this.canvas.getContext("2d");
+        this.ctx.imageSmoothingQuality = "high";
 
-<nav >
+        this.elements = [];
+    }
     
-    <input type="text" id="nav-search" placeholder="Search" />
+    /**
+     * Factory to create Linen element and add it to the canvas.
+     * @param {string} type
+     * @returns {Object|Boolean}
+     */
+    addElement(type) {
+        if (typeof Linen[type] !== "function") {
+            console.log("cannot addElement ", type);
+            console.log(type, " is ", typeof Linen[type]);
+            return false;
+        } else {
+            const element = new Linen[type](this);
+            this.elements.push(element);
+            return element;
+        }
+    }
     
-    <h2><a href="index.html">Home</a></h2><h2><a href="https://github.com/brianwendt/linen" target="_blank" class="menu-item" id="website_link" >GitHub</a></h2><h3>Tutorials</h3><ul><li><a href="tutorial-1basics.html">Basic Examples</a></li><li><a href="tutorial-2advanced.html">Advanced Tutorials</a></li></ul><h3>Classes</h3><ul><li><a href="Linen.html">Linen</a><ul class='methods'><li data-type='method'><a href="Linen.html#addElement">addElement</a></li><li data-type='method'><a href="Linen.html#setWidth">setWidth</a></li><li data-type='method'><a href="Linen.html#setHeight">setHeight</a></li><li data-type='method'><a href="Linen.html#getUrl">getUrl</a></li><li data-type='method'><a href="Linen.html#context">context</a></li><li data-type='method'><a href="Linen.html#render">render</a></li></ul></li><li><a href="Linen.Model.html">Model</a><ul class='methods'><li data-type='method'><a href="Linen.Model.html#dpi">dpi</a></li><li data-type='method'><a href="Linen.Model.html#width">width</a></li><li data-type='method'><a href="Linen.Model.html#height">height</a></li><li data-type='method'><a href="Linen.Model.html#x">x</a></li><li data-type='method'><a href="Linen.Model.html#y">y</a></li><li data-type='method'><a href="Linen.Model.html#setWidth">setWidth</a></li><li data-type='method'><a href="Linen.Model.html#setHeight">setHeight</a></li><li data-type='method'><a href="Linen.Model.html#setX">setX</a></li><li data-type='method'><a href="Linen.Model.html#setY">setY</a></li><li data-type='method'><a href="Linen.Model.html#setXY">setXY</a></li><li data-type='method'><a href="Linen.Model.html#setAlignment">setAlignment</a></li><li data-type='method'><a href="Linen.Model.html#center">center</a></li><li data-type='method'><a href="Linen.Model.html#setVAlignment">setVAlignment</a></li><li data-type='method'><a href="Linen.Model.html#middle">middle</a></li><li data-type='method'><a href="Linen.Model.html#setTransorm">setTransorm</a></li><li data-type='method'><a href="Linen.Model.html#setFill">setFill</a></li><li data-type='method'><a href="Linen.Model.html#setStroke">setStroke</a></li><li data-type='method'><a href="Linen.Model.html#setClip">setClip</a></li><li data-type='method'><a href="Linen.Model.html#setDimension">setDimension</a></li><li data-type='method'><a href="Linen.Model.html#getSetting">getSetting</a></li><li data-type='method'><a href="Linen.Model.html#setSetting">setSetting</a></li><li data-type='method'><a href="Linen.Model.html#setProp">setProp</a></li><li data-type='method'><a href="Linen.Model.html#setFillStyle">setFillStyle</a></li><li data-type='method'><a href="Linen.Model.html#setFilter">setFilter</a></li><li data-type='method'><a href="Linen.Model.html#setGlobalAlpha">setGlobalAlpha</a></li><li data-type='method'><a href="Linen.Model.html#setLineCap">setLineCap</a></li><li data-type='method'><a href="Linen.Model.html#setLineJoin">setLineJoin</a></li><li data-type='method'><a href="Linen.Model.html#setLineWidth">setLineWidth</a></li><li data-type='method'><a href="Linen.Model.html#setMiterLimit">setMiterLimit</a></li><li data-type='method'><a href="Linen.Model.html#setShadowBlur">setShadowBlur</a></li><li data-type='method'><a href="Linen.Model.html#setShadowColor">setShadowColor</a></li><li data-type='method'><a href="Linen.Model.html#setShadowOffsetX">setShadowOffsetX</a></li><li data-type='method'><a href="Linen.Model.html#setShadowOffsetY">setShadowOffsetY</a></li><li data-type='method'><a href="Linen.Model.html#setStrokeStyle">setStrokeStyle</a></li><li data-type='method'><a href="Linen.Model.html#setTextAlign">setTextAlign</a></li><li data-type='method'><a href="Linen.Model.html#setTextBaseline">setTextBaseline</a></li><li data-type='method'><a href="Linen.Model.html#setCallback">setCallback</a></li></ul></li><li><a href="Linen.Arc.html">Arc</a><ul class='methods'><li data-type='method'><a href="Linen.Arc.html#setRadius">setRadius</a></li><li data-type='method'><a href="Linen.Arc.html#render">render</a></li></ul></li><li><a href="Linen.Image.html">Image</a><ul class='methods'><li data-type='method'><a href="Linen.Image.html#setSrc">setSrc</a></li></ul></li><li><a href="Linen.Line.html">Line</a><ul class='methods'><li data-type='method'><a href="Linen.Line.html#setCords">setCords</a></li><li data-type='method'><a href="Linen.Line.html#render">render</a></li><li data-type='method'><a href="Linen.Line.html#setAlignment">setAlignment</a></li></ul></li><li><a href="Linen.Rectangle.html">Rectangle</a></li><li><a href="Linen.Text.html">Text</a><ul class='methods'><li data-type='method'><a href="Linen.Text.html#setWrap">setWrap</a></li><li data-type='method'><a href="Linen.Text.html#setText">setText</a></li><li data-type='method'><a href="Linen.Text.html#setFontFamily">setFontFamily</a></li><li data-type='method'><a href="Linen.Text.html#setFontSize">setFontSize</a></li><li data-type='method'><a href="Linen.Text.html#setBold">setBold</a></li><li data-type='method'><a href="Linen.Text.html#setItalic">setItalic</a></li></ul></li><li><a href="Linen.Canvas.html">Canvas</a><ul class='methods'><li data-type='method'><a href="Linen.Canvas.html#setCanvas">setCanvas</a></li></ul></li><li><a href="Linen.Path.html">Path</a><ul class='methods'><li data-type='method'><a href="Linen.Path.html#addPath">addPath</a></li></ul></li></ul>
-</nav>
-
-<div id="main">
+    /**
+     * Set the width of the HTML5 canvas node
+     * @param {string} width
+     * @returns {Linen}
+     */
+    setWidth(width){
+        this.canvas.width = width;
+        return this;
+    }
     
-    <h1 class="page-title">Model.js</h1>
+    /**
+     * Set the height of the HTML5 canvas node
+     * @param {string} height
+     * @returns {Linen}
+     */
+    setHeight(height){
+        this.canvas.height = height;
+        return this;
+    }
     
+    /**
+     * Get the dataURL of the canvas.
+     * Note: this may not work if you've "tainted" the canvas with an image.
+     * @param {string} format - image/png | image/jpg
+     * @returns {string}
+     */
+    getUrl(format = 'image/png'){
+        return this.canvas.toDataURL(format);
+    }
 
-    
+    /**
+     * Get the canvas' context
+     * @returns {CanvasRenderingContext2D}
+     */
+    context() {
+        return this.ctx;
+    }
 
+    /**
+     * Sort the elements by zindex and start the rendering queue.
+     */
+    render() {
+        this.elements = this.elements.sort(function (a, b) {
+            if (a.settings.zindex > b.settings.zindex) {
+                return 1;
+            } else if (a.settings.zindex < b.settings.zindex) {
+                return -1;
+            } else {
+                return 0;
+            }
+        });
+        this.renderQueued();
+    }
 
-
-    
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>/**
+    /**
+     * Render the next element onto the canvas.
+     * @access private
+     */
+    renderQueued() {
+        if (this.elements.length > 0) {
+            const element = this.elements.shift();
+            element.render().afterRender();
+        }
+    }
+}
+/**
  * All other Linen elements extend this Model.
  */
 Linen.Model = class {
@@ -623,30 +696,38 @@ Linen.Model = class {
         return this.callback();
     }
 };
-</code></pre>
-        </article>
-    </section>
+/**
+ * Model for drawing rectangles.<br/>
+ * This element extends {@link Linen.Model} and inherits all of it's methods.
+ * @tutorial rectangle
+ */
+Linen.Rectangle = class extends Linen.Model {
 
+    /**
+     * @param {Linen} Linen - The instance of Linen.
+     */
+    constructor(Linen) {
+        super(Linen);
+    }
 
-
-
-    
-    
-</div>
-
-<br class="clear">
-
-<footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Apr 12 2019 01:28:04 GMT-0700 (Mountain Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
-</footer>
-
-<script>prettyPrint();</script>
-<script src="scripts/polyfill.js"></script>
-<script src="scripts/linenumber.js"></script>
-
-<script src="scripts/search.js" defer></script>
-
-
-
-</body>
-</html>
+    /**
+     * Render the Rectangle on the Linen.canvas object
+     * @access private
+     */
+    render() {
+        super.render();
+        this.context().beginPath();
+        var width = super.width();
+        var height = super.height();
+        var x = super.x();
+        var y = super.y();
+        this.context().rect(x, y, width, height);
+        if (this.fill) {
+            this.context().fill();
+        }
+        if (this.stroke) {
+            this.context().stroke();
+        }
+        return this;
+    }
+};
